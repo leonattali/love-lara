@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Letter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+    body {
+      background-color: #fce4ec;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Dancing Script', cursive;
+      gap: 32px;
+      overflow: hidden;
+      padding: 30px 16px;
+    }
+ 
+    /* ══════════════════════════════
+       CHUVA DE CORAÇÕES
+    ══════════════════════════════ */
+    #heart-rain {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+    }
+ 
+    .rain-heart {
+      position: absolute;
+      top: -60px;
+      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+      line-height: 1;
+      user-select: none;
+      animation: fallDown linear infinite;
+    }
+ 
+    @keyframes fallDown {
+      0%   { transform: translateY(0px);    opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translateY(110vh);  opacity: 0; }
+    }
+ 
+    /* ══════════════════════════════
+       BOTÃO
+    ══════════════════════════════ */
+    .btn-open {
+      padding: 14px 44px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #fff;
+      background: linear-gradient(135deg, #e57373, #c0392b);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(192,57,43,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-open:hover { transform: scale(1.07); box-shadow: 0 6px 22px rgba(192,57,43,0.5); }
+    .btn-open:disabled { opacity: 0.45; cursor: default; transform: none; }
+    .btn-emoji {
+      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+      font-size: 20px;
+    }
+ 
+    /* ══════════════════════════════
+       CENA
+    ══════════════════════════════ */
+    .scene {
+      position: relative;
+      width: 320px;
+      height: 380px;
+    }
+ 
+    .shadow {
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 230px; height: 16px;
+      background: rgba(0,0,0,0.12);
+      border-radius: 50%;
+      z-index: 1;
+    }
+ 
+    /* ══════════════════════════════
+       ENVELOPE
+    ══════════════════════════════ */
+    .envelope-wrap {
+      position: absolute;
+      bottom: 16px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 200px;
+      z-index: 3;
+    }
+ 
+    .env-body {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 300px; height: 180px;
+      background: #f08080;
+      border-radius: 0 0 8px 8px;
+      z-index: 1;
+    }
+ 
+    .env-bottom {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 0;
+      border-left:  150px solid transparent;
+      border-right: 150px solid transparent;
+      border-bottom: 95px solid #e06868;
+      z-index: 2;
+    }
+ 
+    .env-left {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 0;
+      border-left:  130px solid #d85f5f;
+      border-top:    90px solid transparent;
+      border-bottom: 90px solid transparent;
+      z-index: 3;
+    }
+ 
+    .env-right {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 0; height: 0;
+      border-right: 130px solid #f09090;
+      border-top:    90px solid transparent;
+      border-bottom: 90px solid transparent;
+      z-index: 3;
+    }
+ 
+    .env-flap {
+      position: absolute;
+      top: 0; left: 0;
+      width: 0; height: 0;
+      border-left:  150px solid transparent;
+      border-right: 150px solid transparent;
+      border-top:   110px solid #c85050;
+      transform-origin: 150px 0;
+      transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 5;
+    }
+ 
+    .open .env-flap {
+      transform: rotateX(200deg);
+    }
+ 
+    /* ══════════════════════════════
+       CARTA
+    ══════════════════════════════ */
+    .card {
+      position: absolute;
+      width: 210px;
+      background: #faeab7;
+      border: 2.5px dashed #c8a84b;
+      border-radius: 6px;
+      text-align: center;
+      padding: 22px 16px 18px;
+      left: 50%; bottom: 70px;
+      transform: translateX(-50%);
+      z-index: 4;
+      opacity: 0;
+      transition: bottom 1s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+    }
+    .card.risen   { bottom: 205px; opacity: 1; }
+    .card.floating { animation: floatCard 3s ease-in-out infinite; }
+ 
+    @keyframes floatCard {
+      0%   { transform: translateX(-50%) translateY(0px)   rotate(-1.2deg); }
+      50%  { transform: translateX(-50%) translateY(-14px) rotate(1.2deg);  }
+      100% { transform: translateX(-50%) translateY(0px)   rotate(-1.2deg); }
+    }
+ 
+    .card-text { font-size: 22px; color: #5d2c2c; line-height: 1.55; }
+ 
+    .card-heart {
+      display: block;
+      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+      font-size: 28px;
+      margin-top: 10px;
+      animation: pulse 1.1s ease-in-out infinite alternate;
+    }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.22); } }
+ 
+    .mh {
+      position: absolute;
+      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+      font-size: 11px;
+    }
+    .mh.tl { top: 6px;    left: 8px;  }
+    .mh.tr { top: 6px;    right: 8px; }
+    .mh.bl { bottom: 6px; left: 8px;  }
+ 
+    /* Corações flutuantes ao redor */
+    .hearts-wrap { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+    .fh {
+      position: absolute;
+      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+      opacity: 0;
+    }
+    .active .fh { animation: floatHeart 3.2s ease-in-out infinite; }
+    .fh:nth-child(1) { top:28%; left:12%; animation-delay:0s;   font-size:13px; }
+    .fh:nth-child(2) { top:18%; left:78%; animation-delay:0.7s; font-size:18px; }
+    .fh:nth-child(3) { top:48%; left:88%; animation-delay:1.2s; font-size:12px; }
+    .fh:nth-child(4) { top:8%;  left:48%; animation-delay:1.8s; font-size:20px; }
+    .fh:nth-child(5) { top:62%; left:4%;  animation-delay:2.3s; font-size:15px; }
+    @keyframes floatHeart {
+      0%  { opacity:0; transform:translateY(0) scale(0.7); }
+      40% { opacity:1; }
+      100%{ opacity:0; transform:translateY(-45px) scale(1.3); }
+    }
+ 
+    /* ══════════════════════════════
+       CONTAGEM REGRESSIVA
+    ══════════════════════════════ */
+    .countdown-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .countdown-wrap.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+ 
+    .countdown-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #b5304f;
+      text-align: center;
+    }
+ 
+    .blocks {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+ 
+    .block {
+      background: #e53935;
+      border-radius: 12px;
+      padding: 10px 14px;
+      min-width: 62px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(229,57,53,0.35);
+    }
+    .block .num {
+      font-family: 'Poppins', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      display: block;
+    }
+    .block .unit {
+      font-family: 'Poppins', sans-serif;
+      font-size: 10px;
+      color: #ffcdd2;
+      margin-top: 3px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+    }
+ 
+    .sep {
+      font-family: 'Poppins', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #e53935;
+      margin-bottom: 14px;
+    }
+ 
+    /* ══════════════════════════════
+       BOTÃO FECHAR
+    ══════════════════════════════ */
+    .btn-close {
+      padding: 12px 40px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #b5304f;
+      background: transparent;
+      border: 2px solid #e57373;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s, color 0.2s;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: -8px;
+    }
+    .btn-close.visible { display: flex; }
+    .btn-close:hover { background: #e57373; color: #fff; transform: scale(1.05); }
+ 
+    /* ══════════════════════════════
+       TELA SURPRESA
+    ══════════════════════════════ */
+    #surprise-screen {
+      position: fixed;
+      inset: 0;
+      background: #fce4ec;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+    #surprise-screen.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    #surprise-screen img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(229,57,53,0.25);
+      transform: scale(0.7);
+      opacity: 0;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s, opacity 0.6s ease 0.4s;
+    }
+    #surprise-screen.show img {
+      transform: scale(1);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+ 
+  <div id="heart-rain"></div>
+ 
+  <div class="scene">
+    <div class="shadow"></div>
+ 
+    <div class="envelope-wrap" id="envWrap">
+      <div class="env-flap"></div>
+      <div class="env-body">
+        <div class="env-bottom"></div>
+        <div class="env-left"></div>
+        <div class="env-right"></div>
+      </div>
+    </div>
+ 
+    <div class="card" id="card">
+      <span class="mh tl">❤️</span>
+      <span class="mh tr">❤️</span>
+      <span class="mh bl">❤️</span>
+      <div class="card-text">Contando<br>os dias<br>pra te ver!</div>
+      <span class="card-heart">❤️</span>
+    </div>
+ 
+    <div class="hearts-wrap" id="heartsWrap">
+      <span class="fh">❤️</span><span class="fh">❤️</span>
+      <span class="fh">❤️</span><span class="fh">❤️</span>
+      <span class="fh">❤️</span>
+    </div>
+  </div>
+ 
+  <button class="btn-open" id="btnOpen" onclick="openEnvelope()">
+    <span class="btn-emoji">💌</span> ABRA
+  </button>
+ 
+  <button class="btn-close" id="btnClose" onclick="closeEnvelope()">✕ FECHAR</button>
+ 
+  <!-- Tela surpresa -->
+  <div id="surprise-screen">
+    <img src="legalne2.png" alt="Surpresa" />
+  </div>
+ 
+  <!-- Contagem Regressiva -->
+  <div class="countdown-wrap" id="countdownWrap">
+    <div class="countdown-title">O primeiro homem que vai morrer de saudades</div>
+    <div class="blocks">
+      <div class="block"><span class="num" id="cd-d">--</span><span class="unit">dias</span></div>
+      <div class="sep">:</div>
+      <div class="block"><span class="num" id="cd-h">--</span><span class="unit">horas</span></div>
+      <div class="sep">:</div>
+      <div class="block"><span class="num" id="cd-m">--</span><span class="unit">min</span></div>
+      <div class="sep">:</div>
+      <div class="block"><span class="num" id="cd-s">--</span><span class="unit">seg</span></div>
+    </div>
+  </div>
+ 
+  <script>
+    /* ── Contagem regressiva ── */
+    function updateCountdown() {
+      const target = new Date('2026-03-20T00:00:00');
+      const now    = new Date();
+      const diff   = target - now;
+ 
+      if (diff <= 0) {
+        document.getElementById('cd-d').textContent = '00';
+        document.getElementById('cd-h').textContent = '00';
+        document.getElementById('cd-m').textContent = '00';
+        document.getElementById('cd-s').textContent = '00';
+        return;
+      }
+ 
+      const days  = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins  = Math.floor((diff % 3600000)  / 60000);
+      const secs  = Math.floor((diff % 60000)     / 1000);
+ 
+      document.getElementById('cd-d').textContent = String(days).padStart(2, '0');
+      document.getElementById('cd-h').textContent = String(hours).padStart(2, '0');
+      document.getElementById('cd-m').textContent = String(mins).padStart(2, '0');
+      document.getElementById('cd-s').textContent = String(secs).padStart(2, '0');
+    }
+ 
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+ 
+    /* ── Abrir envelope ── */
+    function openEnvelope() {
+      const envWrap   = document.getElementById('envWrap');
+      const card      = document.getElementById('card');
+      const hearts    = document.getElementById('heartsWrap');
+      const btn       = document.getElementById('btnOpen');
+      const countdown = document.getElementById('countdownWrap');
+ 
+      btn.disabled = true;
+      envWrap.classList.add('open');
+ 
+      setTimeout(() => {
+        card.classList.add('risen');
+        hearts.classList.add('active');
+      }, 750);
+ 
+      setTimeout(() => {
+        card.classList.add('floating');
+        startHeartRain();
+        countdown.classList.add('visible');
+        document.getElementById('btnClose').classList.add('visible');
+      }, 1800);
+    }
+ 
+    /* ── Fechar envelope ── */
+    let rainLoops = [];
+    function closeEnvelope() {
+      // Para chuva de corações
+      document.getElementById('heart-rain').innerHTML = '';
+ 
+      // Esconde tudo com fade
+      document.querySelector('.scene').style.transition        = 'opacity 0.6s ease';
+      document.querySelector('.scene').style.opacity           = '0';
+      document.querySelector('.btn-open').style.transition     = 'opacity 0.6s ease';
+      document.querySelector('.btn-open').style.opacity        = '0';
+      document.getElementById('btnClose').style.transition     = 'opacity 0.6s ease';
+      document.getElementById('btnClose').style.opacity        = '0';
+      document.getElementById('countdownWrap').style.transition = 'opacity 0.6s ease';
+      document.getElementById('countdownWrap').style.opacity   = '0';
+ 
+      // Mostra imagem surpresa
+      setTimeout(() => {
+        document.querySelector('.scene').style.display        = 'none';
+        document.querySelector('.btn-open').style.display     = 'none';
+        document.getElementById('btnClose').style.display     = 'none';
+        document.getElementById('countdownWrap').style.display = 'none';
+        document.getElementById('surprise-screen').classList.add('show');
+      }, 650);
+    }
+ 
+    /* ── Chuva de corações ── */
+    function startHeartRain() {
+      const rain  = document.getElementById('heart-rain');
+      const COUNT = 28;
+      for (let i = 0; i < COUNT; i++) {
+        spawnHeart(rain, i * 150);
+      }
+    }
+ 
+    function spawnHeart(container, initialDelay) {
+      setTimeout(function loop() {
+        const h   = document.createElement('span');
+        const size = 18 + Math.random() * 20;
+        const dur  = 3  + Math.random() * 3;
+ 
+        h.classList.add('rain-heart');
+        h.textContent             = '❤️';
+        h.style.left              = Math.random() * 100 + 'vw';
+        h.style.fontSize          = size + 'px';
+        h.style.animationDuration = dur + 's';
+        h.style.animationDelay    = '0s';
+ 
+        container.appendChild(h);
+ 
+        setTimeout(() => {
+          h.remove();
+          loop();
+        }, (dur + 0.2) * 1000);
+      }, initialDelay);
+    }
+  </script>
+</body>
+</html>
